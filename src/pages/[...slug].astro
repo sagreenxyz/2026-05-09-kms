@@ -1,0 +1,57 @@
+---
+export async function getStaticPaths() {
+	function toRoute(filePath) {
+		const normalized = filePath.replace('../../content/', '');
+		const parts = normalized.split('/');
+		const file = parts.pop();
+		const name = file.replace(/\.(md|mdx|astro)$/, '');
+		const dir = parts.join('/');
+
+		if (name === 'index') {
+			return dir;
+		}
+
+		return dir ? `${dir}/${name}` : name;
+	}
+
+	const contentModules = import.meta.glob('../../content/**/*.{md,mdx,astro}');
+	const paths = [];
+
+	for (const [filePath, loader] of Object.entries(contentModules)) {
+		const mod = await loader();
+		const route = toRoute(filePath);
+
+		if (!route) {
+			continue;
+		}
+
+		paths.push({
+			params: { slug: route },
+			props: {
+				mod,
+				route,
+			},
+		});
+	}
+
+	return paths;
+}
+
+const { mod, route } = Astro.props;
+const Content = mod.default;
+const title = mod.frontmatter?.title || (route ? route : 'Home');
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<main>
+			<Content />
+		</main>
+	</body>
+</html>
