@@ -1,10 +1,26 @@
 ---
 export async function getStaticPaths() {
+	function extensionPriority(filePath) {
+		if (filePath.endsWith('.astro')) {
+			return 3;
+		}
+
+		if (filePath.endsWith('.mdx')) {
+			return 2;
+		}
+
+		if (filePath.endsWith('.md')) {
+			return 1;
+		}
+
+		return 0;
+	}
+
 	function toRoute(filePath) {
 		const normalized = filePath.replace('../../content/', '');
 		const parts = normalized.split('/');
 		const file = parts.pop();
-		const name = file.replace(/\.(md|mdx|astro)$/, '');
+		const name = file.replace(/\.[^/.]+$/, '');
 		const dir = parts.join('/');
 
 		if (name === 'index') {
@@ -15,15 +31,27 @@ export async function getStaticPaths() {
 	}
 
 	const contentModules = import.meta.glob('../../content/**/*.{md,mdx,astro}');
-	const paths = [];
+	const selectedByRoute = new Map();
 
-	for (const [filePath, loader] of Object.entries(contentModules)) {
-		const mod = await loader();
+	for (const filePath of Object.keys(contentModules)) {
 		const route = toRoute(filePath);
-
 		if (!route) {
 			continue;
 		}
+
+		const next = { filePath, priority: extensionPriority(filePath) };
+		const current = selectedByRoute.get(route);
+
+		if (!current || next.priority > current.priority) {
+			selectedByRoute.set(route, next);
+		}
+	}
+
+	const paths = [];
+
+	for (const [route, { filePath }] of selectedByRoute.entries()) {
+		const loader = contentModules[filePath];
+		const mod = await loader();
 
 		paths.push({
 			params: { slug: route },

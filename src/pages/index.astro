@@ -1,5 +1,30 @@
 ---
-import HomeContent from '../../content/index.md';
+function extensionPriority(filePath) {
+	if (filePath.endsWith('.astro')) {
+		return 3;
+	}
+
+	if (filePath.endsWith('.mdx')) {
+		return 2;
+	}
+
+	if (filePath.endsWith('.md')) {
+		return 1;
+	}
+
+	return 0;
+}
+
+const homeModules = import.meta.glob('../../content/index.{md,mdx,astro}');
+const selectedHomePath = Object.keys(homeModules)
+	.sort((a, b) => extensionPriority(b) - extensionPriority(a))[0];
+
+if (!selectedHomePath) {
+	throw new Error('No content/index file found. Add content/index.astro, content/index.mdx, or content/index.md.');
+}
+
+const homeModule = await homeModules[selectedHomePath]();
+const HomeContent = homeModule.default;
 
 const title = 'Home';
 ---

@@ -26,6 +26,7 @@ A **Personal Information Management System** built for a nursing student, deploy
 4. **Index files are always first.** Any `index.md`, `index.mdx`, or `index.astro` inside a folder is always the first item in that folder's navigation sequence, by default.
 5. **Components are scoped.** A folder named `components/` at any level is excluded from navigation and treated as a component library available to that folder and all its descendants.
 6. **Roots are declared, not assumed.** Navigation chains are defined by a `root: true` flag in a `config.json` file. The app walks up the tree to find the nearest declared root.
+7. **Content is interlinked like a wiki.** Every content page should participate in a deliberate internal link web (parent, sibling, related-topic, and reference links), not exist as an isolated leaf.
 
 ---
 
@@ -118,6 +119,33 @@ You can have independent navigation chains by declaring roots at different level
 
 ---
 
+## Wiki Link Web Strategy
+
+Treat each content document as a node in a wiki graph.
+
+### Link Types to Maintain
+
+- **Parent links**: Link back to the section `index` page.
+- **Sibling links**: Link to adjacent concepts in the same folder when meaningful.
+- **Related links**: Link to supporting content in other folders (cross-chain links).
+- **Reference links**: Link to canonical definitions, protocols, or source notes.
+
+### Authoring Rules
+
+- Every non-index content page should include at least one parent link and at least two meaningful internal links.
+- Section `index` pages should act as hubs and include links to all major child pages in that section.
+- Prefer contextual links inside paragraphs over large "see also" dumps.
+- Use descriptive anchor text that explains destination context (avoid generic text like "click here").
+- Avoid orphan pages: if a page has no inbound links from at least one index or related page, add one.
+
+### Cross-Chain Convention
+
+- Cross-chain links are allowed and encouraged when conceptually relevant (for example, pharmacology to anatomy, or anatomy to quiz review).
+- When linking across chains, include a short context phrase around the link so users understand why they are leaving the current chain.
+- Preserve local Previous/Next/Home behavior even when cross-chain links exist.
+
+---
+
 ## Maintenance Utility (`maintenance.astro`)
 
 A local/staging-only page that:
@@ -187,11 +215,23 @@ Use these questions whenever you face a design or architecture decision. They ar
 
 ---
 
+### Wiki Linking
+
+- If this page were read alone, which 2-4 pages should it link to next?
+- Does this section `index` function as a true hub for all important child pages?
+- Are there at least one or two cross-chain links that improve understanding without disrupting navigation?
+- Does every new page have at least one inbound path from an index or related page?
+
+---
+
 ### Maintenance & Validation
 
 - After restructuring content, have you run the maintenance page to check for orphans or missing roots?
 - Are there any folders missing an `index` file?
 - Are there any conflicting root declarations at the same level?
+- Are there any orphan pages with no inbound links?
+- Do section index pages still reflect their current child pages?
+- Do cross-chain links still resolve and provide useful context?
 
 ---
 
